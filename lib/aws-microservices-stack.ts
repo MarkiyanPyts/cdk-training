@@ -1,4 +1,5 @@
 import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -36,5 +37,20 @@ export class AwsMicroservicesStack extends Stack {
     })
 
     productTable.grantReadWriteData(productFunction)
+
+    const apigw = new LambdaRestApi(this, 'productApi', {
+      restApiName: 'Product Service',
+      handler: productFunction,
+      proxy: false
+    })
+
+    const product = apigw.root.addResource('product')
+    product.addMethod('GET')
+    product.addMethod('POST')
+
+    const singleProduct = product.addResource('{id}') // product/{id} is a path parameter
+    singleProduct.addMethod('GET')// GET /product/{id}
+    singleProduct.addMethod('PUT')// PUT /product/{id}
+    singleProduct.addMethod('DELETE')// DELETE /product/{id}
   }
 }
