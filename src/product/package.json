@@ -5,6 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.256.0",
-    "@aws-sdk/util-dynamodb": "^3.256.0"
+    "@aws-sdk/util-dynamodb": "^3.256.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0"
   }
 }
