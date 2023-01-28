@@ -22,8 +22,10 @@ exports.handler = async function(event: any) {
                 break;
             case "PUT":
                 body = await updateProduct(event)
+                break;
             case "DELETE":
                 body = await deleteProduct(event.pathParameters.id)
+                break;
             default:
                 throw new Error(`Unsupported route "${event.httpMethod}"`);
         }
