@@ -5,52 +5,23 @@ import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { join } from 'path';
+import { SwnApiGateway } from './apigateway';
+import { SwnDatabase } from './database';
+import { SwnMicroservices } from './microservice';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const productTable = new Table(this, 'product', {
-      partitionKey: {
-        name: 'id',
-        type: AttributeType.STRING
-      },
-      tableName: 'product',
-      removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST
+    const database = new SwnDatabase(this, 'Database')
+
+    const microservices = new SwnMicroservices(this, 'Microservices', {
+      productTable: database.productTable
     })
 
-    const nodeJsFunctionProps: NodejsFunctionProps = {
-      bundling: {
-        externalModules: ['aws-sdk'],
-      },
-      environment: {
-        PRIMARY_KEY: 'id',
-        DYNAMO_TABLE_NAME: productTable.tableName
-      },
-      runtime: Runtime.NODEJS_18_X
-    }
-    const productFunction = new NodejsFunction(this, 'productLambdaFunction', {
-      entry: join(__dirname, '../src/product/index.ts'),
-      ...nodeJsFunctionProps
-    })
-
-    productTable.grantReadWriteData(productFunction)
-
-    const apigw = new LambdaRestApi(this, 'productApi', {
-      restApiName: 'Product Service',
-      handler: productFunction,
-      proxy: false
-    })
-
-    const product = apigw.root.addResource('product')
-    product.addMethod('GET')
-    product.addMethod('POST')
-
-    const singleProduct = product.addResource('{id}') // product/{id} is a path parameter
-    singleProduct.addMethod('GET')// GET /product/{id}
-    singleProduct.addMethod('PUT')// PUT /product/{id}
-    singleProduct.addMethod('DELETE')// DELETE /product/{id}
+    const apigateway = new SwnApiGateway(this, 'ApiGateway', {
+      productMicroservice: microservices.productMicroservice
+    });
   }
 }

@@ -139,7 +139,7 @@ const updateProduct = async (event: any): Promise<any> => {
         console.log(`updateProduct function. requestBody : "${requestBody}", objKeys: "${objKeys}"`);    
 
         const params = {
-            TableName: process.env.DYNAMODB_TABLE_NAME,
+            TableName: process.env.DYNAMO_TABLE_NAME,
             Key: marshall({ id: event.pathParameters.id }),
             UpdateExpression: `SET ${objKeys.map((_, index) => `#key${index} = :value${index}`).join(", ")}`,
             ExpressionAttributeNames: objKeys.reduce((acc, key, index) => ({
@@ -151,7 +151,7 @@ const updateProduct = async (event: any): Promise<any> => {
                 [`:value${index}`]: requestBody[key],
             }), {})),
         };
-
+console.log("pars", params)
         const updateResult = await ddbClient.send(new UpdateItemCommand(params));
 
         console.log(updateResult);
