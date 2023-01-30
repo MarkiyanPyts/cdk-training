@@ -12,7 +12,8 @@ export class AwsMicroservicesStack extends Stack {
     const database = new SwnDatabase(this, 'Database')
 
     const microservices = new SwnMicroservices(this, 'Microservices', {
-      productTable: database.productTable
+      productTable: database.productTable,
+      basketTable: database.basketTable
     })
 
     const apigateway = new SwnApiGateway(this, 'ApiGateway', {
