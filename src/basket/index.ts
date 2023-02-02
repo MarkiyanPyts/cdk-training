@@ -90,14 +90,15 @@ const createBasket = async (event: any): Promise<any> => {
     console.log('createBasket', event)
 
     try {
+        const requestBody = JSON.parse(event.body);
         const params = {
             TableName: process.env.DYNAMO_TABLE_NAME,
-            Item: marshall(event.body)
+            Item: marshall(requestBody || {})
         }
 
-        const result = await ddbClient.send(new PutItemCommand(params));
-        console.log('createBasket result', result)
-        return result;
+        const createResult = await ddbClient.send(new PutItemCommand(params));
+        console.log('createBasket createResult', createResult)
+        return createResult;
     } catch (e: any) {
         console.error(e);
         throw e;
@@ -117,9 +118,9 @@ const deleteBasket = async (userName: string): Promise<any> => {
             Key: marshall({userName: userName})
         }
 
-        const result = await ddbClient.send(new DeleteItemCommand(params));
-        console.log('deleteBasket result', result)
-        return result;
+        const deleteResult = await ddbClient.send(new DeleteItemCommand(params));
+        console.log('deleteBasket deleteResult', deleteResult)
+        return deleteResult;
     } catch (e: any) {
         console.error(e);
         throw e;
