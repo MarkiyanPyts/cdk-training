@@ -1,8 +1,11 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
+import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Construct } from 'constructs';
 import { SwnApiGateway } from './apigateway';
 import { SwnDatabase } from './database';
 import { SwnMicroservices } from './microservice';
+import {SwnEventBus} from './eventBus'
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class AwsMicroservicesStack extends Stack {
@@ -20,5 +23,10 @@ export class AwsMicroservicesStack extends Stack {
       productMicroservice: microservices.productMicroservice,
       basketMicroservice: microservices.basketMicroservice
     });
+
+    const eventbus = new SwnEventBus (this, 'EventBus', {
+      publisherFunction: microservices.basketMicroservice,
+      targetFunction: ??
+    })
   }
 }
