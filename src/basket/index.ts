@@ -107,6 +107,16 @@ const createBasket = async (event: any): Promise<any> => {
 
 const checkoutBasket = async (event: any): Promise<any> => {
     console.log('checkoutBasket', event)
+    const checkoutRequest = JSON.parse(event.body);
+
+    if (checkoutRequest == null || checkoutRequest?.userName == null) {
+        throw new Error(`userNAame should exist in checkoutRequest ${checkoutRequest}}`);
+    }
+    const basket = await getBasket(checkoutRequest?.userName);
+
+    const checkoutPayload = prepareOrderPayload(checkoutRequest, basket);
+    const publishedEvent = await publishCheckoutBasketEvent(checkoutPayload);
+    await deleteBasket(checkoutRequest?.userName);
 }
 
 const deleteBasket = async (userName: string): Promise<any> => {

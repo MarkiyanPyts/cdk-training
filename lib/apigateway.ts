@@ -50,7 +50,7 @@ export class SwnApiGateway extends Construct {
         singleBasket.addMethod('DELETE')// DELETE /basket/{userName}
 
         const basketCheckout = basket.addResource('checkout') 
-        singleBasket.addMethod('POST')// POST /basket/checkout
+        basketCheckout.addMethod('POST')// POST /basket/checkout
     }
 
     private createOrderingApi(orderingMicroservice: IFunction) {
