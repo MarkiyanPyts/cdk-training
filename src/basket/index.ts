@@ -1,6 +1,8 @@
 import { DeleteItemCommand, GetItemCommand, PutItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { PutEventsCommand } from "@aws-sdk/client-eventbridge";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { ddbClient } from "./ddbClient";
+import { ebClient } from "./eventBridgeClient";
 
 exports.handler = async function(event: any) {
     console.log("request:", JSON.stringify(event, undefined, 2));
@@ -136,3 +138,57 @@ const deleteBasket = async (userName: string): Promise<any> => {
         throw e;
     }
 };
+
+const prepareOrderPayload = (checkoutRequest: any, basket: any) => {    
+    console.log("prepareOrderPayload");
+    
+    // prepare order payload -> calculate totalprice and combine checkoutRequest and basket items
+    // aggregate and enrich request and basket data in order to create order payload    
+    try {
+        if (basket == null || basket.items == null) {
+            throw new Error(`basket should exist in items: "${basket}"`);
+        }
+  
+        // calculate totalPrice
+        let totalPrice = 0;
+        basket.items.forEach((item: { price: number; }) => totalPrice = totalPrice + item.price);
+        checkoutRequest.totalPrice = totalPrice;
+        console.log(checkoutRequest);
+    
+        // copies all properties from basket into checkoutRequest
+        Object.assign(checkoutRequest, basket);
+        console.log("Success prepareOrderPayload, orderPayload:", checkoutRequest);
+        return checkoutRequest;
+  
+      } catch(e) {
+        console.error(e);
+        throw e;
+    }    
+  }
+
+  const publishCheckoutBasketEvent = async (checkoutPayload: any) => {
+    console.log("publishCheckoutBasketEvent with payload :", checkoutPayload);
+    try {
+        // eventbridge parameters for setting event to target system
+        const params = {
+            Entries: [
+                {
+                    Source: process.env.EVENT_SOURCE,
+                    Detail: JSON.stringify(checkoutPayload),
+                    DetailType: process.env.EVENT_DETAILTYPE,
+                    Resources: [ ],
+                    EventBusName: process.env.EVENT_BUSNAME
+                },
+            ],
+        };
+     
+        const data = await ebClient.send(new PutEventsCommand(params));
+    
+        console.log("Success, event sent; requestID:", data);
+        return data;
+    
+      } catch(e) {
+        console.error(e);
+        throw e;
+    }
+  }
