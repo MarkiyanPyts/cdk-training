@@ -13,9 +13,8 @@ exports.handler = async function(event: any) {
             case "GET":
                 if (event.pathParameters != null) {
                     body = await getBasket(event.pathParameters?.userName)
-                } else if (event.pathParameters != null) {
+                } else {
                     body = await getAllBaskets()
-                    // GET /product/{id}
                 }
                 break;
             case "POST":
@@ -81,7 +80,7 @@ const getAllBaskets = async (): Promise<any> => {
 
         const {Items} = await ddbClient.send(new ScanCommand(params));
         console.log('getAllBaskets result', Items)
-        return (Items) ? Items : [];
+        return (Items) ? Items.map((Item) => {return unmarshall(Item)}) : [];
     } catch (e: any) {
         console.error(e);
         throw e;
