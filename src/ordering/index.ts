@@ -33,7 +33,7 @@ const createOrder = async (basketCheckoutEvent: any) => {
     console.log(basketCheckoutEvent);
     
     const params = {
-      TableName: process.env.DYNAMODB_TABLE_NAME,
+      TableName: process.env.DYNAMO_TABLE_NAME,
       Item: marshall(basketCheckoutEvent || {})
     };
 
@@ -92,7 +92,7 @@ const getOrder = async (event: any) => {
     
   try {
     // expected request : xxx/order/swn?orderDate=timestamp
-    const userName = event.pathParameters.userName;  
+    const userName = event.pathParameters.userName;
     const orderDate = event.queryStringParameters.orderDate; 
 
     const params = {
@@ -101,7 +101,7 @@ const getOrder = async (event: any) => {
         ":userName": { S: userName },
         ":orderDate": { S: orderDate }
       },
-      TableName: process.env.DYNAMODB_TABLE_NAME
+      TableName: process.env.DYNAMO_TABLE_NAME
     };
  
     const { Items } = await ddbClient.send(new QueryCommand(params));
@@ -118,7 +118,7 @@ const getAllOrders = async () => {
   console.log("getAllOrders");    
   try {
       const params = {
-        TableName: process.env.DYNAMODB_TABLE_NAME
+        TableName: process.env.DYNAMO_TABLE_NAME
       };
   
       const { Items } = await ddbClient.send(new ScanCommand(params));
